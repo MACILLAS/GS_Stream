@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  webinspector-csr:
+  webinspector-gs-data-catalog:
     build: .
     ports:
       - "5000:5000"
