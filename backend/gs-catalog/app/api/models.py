@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, send_file, request
 import os
 
 models_blueprint = Blueprint(
-    "api",
+    "models_api",
     __name__,
 )
 
