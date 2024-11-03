@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "gs-stream"
+version = "0.1.0"
+description = ""
+authors = ["Kyungwan Han <kyungwanhan@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+flask = "^3.0.3"
+flask-cors = "^4.0.1"
+pytest = "^8.3.3"
+coverage = "^7.6.4"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
