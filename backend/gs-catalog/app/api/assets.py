@@ -1,39 +1,39 @@
 from flask import Blueprint, jsonify, send_file, request
 import os
 
-models_blueprint = Blueprint(
-    "models_api",
+assets_blueprint = Blueprint(
+    "assets_api", 
     __name__,
 )
 
-# Temporary code to serve splat models
-splat_models = [
+# Temporary code to serve splat assets
+splat_assets = [
     {"id": "101", "name": "st_comb/st_1", "file": "st_1.splat"},
     {"id": "102", "name": "st_comb/st_2", "file": "st_2.splat"},
     {"id": "103", "name": "RCH", "file": "rch.splat"},
 ]
 
 
-@models_blueprint.route("/models/splat/list", methods=["GET"])
-def get_splat_models_list():
-    return jsonify(splat_models)
+@assets_blueprint.route("/assets/splat/list", methods=["GET"])
+def get_splat_assets_list():
+    return jsonify(splat_assets)
 
 
-@models_blueprint.route("/models/splat/<splat_model_id>", methods=["GET"])
-def get_splat_model_data(splat_model_id):
-    SPLAT_MODELS_DIRECTORY = (
+@assets_blueprint.route("/assets/splat/<splat_asset_id>", methods=["GET"])
+def get_splat_asset_data(splat_asset_id):
+    SPLAT_ASSETS_DIRECTORY = (
         os.path.join(
             os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "asset_files"
         )
         + os.sep
     )
-    model_file = next(
-        (model["file"] for model in splat_models if model["id"] == splat_model_id), None
+    asset_file = next(
+        (asset["file"] for asset in splat_assets if asset["id"] == splat_asset_id), None
     )
-    if model_file is None:
+    if asset_file is None:
         return "Asset not found", 404
 
-    file_path = SPLAT_MODELS_DIRECTORY + model_file
+    file_path = SPLAT_ASSETS_DIRECTORY + asset_file
 
     if os.path.exists(file_path):
         return send_file(file_path, as_attachment=True)

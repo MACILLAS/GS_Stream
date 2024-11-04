@@ -2,11 +2,11 @@ import pytest
 import os
 
 
-def test_01_get_splat_models_list(client, request):
+def test_01_get_splat_assets_list(client, request):
     """
-    Test to get the list of splat models.
+    Test to get the list of splat assets.
     """
-    response = client.get("/api/models/splat/list")
+    response = client.get("/api/assets/splat/list")
     # Check if the status code is 200
     assert (
         response.status_code == 200
@@ -32,8 +32,8 @@ def test_01_get_splat_models_list(client, request):
         ("103", "rch.splat"),
     ],
 )
-def test_02_get_splat_model_data(client, file_id, file_name):
-    response = client.get(f"/api/models/splat/{file_id}")
+def test_02_get_splat_asset_data(client, file_id, file_name):
+    response = client.get(f"/api/assets/splat/{file_id}")
 
     # Check if the status code is 200
     assert (
@@ -63,8 +63,8 @@ def test_02_get_splat_model_data(client, file_id, file_name):
     "invalid_file_id",
     ["999", "abc", "000"],  # Test cases with invalid file IDs
 )
-def test_03_get_invalid_splat_model_data(client, invalid_file_id):
-    response = client.get(f"/api/models/splat/{invalid_file_id}")
+def test_03_get_invalid_splat_asset_data(client, invalid_file_id):
+    response = client.get(f"/api/assets/splat/{invalid_file_id}")
 
     # Check if the status code is 404 for invalid file ID
     assert (
@@ -74,4 +74,4 @@ def test_03_get_invalid_splat_model_data(client, invalid_file_id):
     # Verify response message for file not found
     assert (
         response.data.decode("utf-8") == "Asset not found"
-    ), f"Expected response 'File not found', got {response.data.decode('utf-8')}"
+    ), f"Expected response 'Asset not found', got {response.data.decode('utf-8')}"
