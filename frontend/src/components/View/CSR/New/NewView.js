@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Checkbox, TextField, Slider, Box } from '@mui/material';
 import {
@@ -34,13 +34,36 @@ function RenderingPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [moveStep, setMoveStep] = useState(1);
   const [rotateStep, setRotateStep] = useState(1);
+  const [allModels, setAllModels] = useState([]);
 
-  const handleObjectSelection = (object) => {
+  const backendCsrAddress = process.env.REACT_APP_CSR_BACKEND_URL;
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      fetch(backendCsrAddress + '/api/models/splat/list')
+        .then((response) => response.json())
+        .then((data) => {
+          if (JSON.stringify(data) !== JSON.stringify(allModels)) {
+            setAllModels(data);
+          }
+        })
+        .catch((error) => {
+          console.error('Fetching data failed', error);
+          setAllModels([]);
+        });
+    }, 1000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [allModels, backendCsrAddress]);
+
+  const handleObjectSelection = (modelId) => {
     setSelectedObjects((prev) =>
-      prev.includes(object)
-        ? prev.filter((obj) => obj !== object)
+      prev.includes(modelId)
+        ? prev.filter((id) => id !== modelId)
         : prev.length < 2
-          ? [...prev, object]
+          ? [...prev, modelId]
           : prev,
     );
   };
@@ -51,11 +74,6 @@ function RenderingPage() {
       [functionName]: !prev[functionName],
     }));
   };
-
-  const objects = Array.from({ length: 50 }, (_, i) => `Object ${i + 1}`);
-  const filteredObjects = objects.filter((obj) =>
-    obj.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
@@ -92,15 +110,27 @@ function RenderingPage() {
               </Button>
             </div>
             <Box className="h-40 border rounded-md p-2" overflow="auto">
-              {filteredObjects.map((object) => (
-                <div key={object} className="flex items-center py-1">
-                  <Checkbox
-                    checked={selectedObjects.includes(object)}
-                    onChange={() => handleObjectSelection(object)}
-                  />
-                  <label className="ml-2">{object}</label>
-                </div>
-              ))}
+              {allModels.length === 0 ? (
+                <div className="text-center text-gray-500">None</div>
+              ) : (
+                allModels
+                  .filter(
+                    (model) =>
+                      model.name && // Ensure model has a name property
+                      model.name
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase()),
+                  )
+                  .map((model) => (
+                    <div key={model.id} className="flex items-center py-1">
+                      <Checkbox
+                        checked={selectedObjects.includes(model.id)}
+                        onChange={() => handleObjectSelection(model.id)}
+                      />
+                      <label className="ml-2">{model.name}</label>
+                    </div>
+                  ))
+              )}
             </Box>
           </div>
 
@@ -124,22 +154,15 @@ function RenderingPage() {
         {/* 3D rendering area */}
         <div className="flex-1 p-4 flex flex-col">
           <div className="flex-1 relative flex gap-4">
-            {selectedObjects.map((object) => (
-              <div key={object} className="flex-1 relative">
-                <ThreeDRenderer object={object} />
-                <div className="absolute top-4 right-4 flex space-x-2">
-                  <Button size="small" variant="outlined">
-                    <PlusSquare className="h-4 w-4" />
-                  </Button>
-                  <Button size="small" variant="outlined">
-                    <MinusSquare className="h-4 w-4" />
-                  </Button>
-                  <Button size="small" variant="outlined">
-                    <Maximize2 className="h-4 w-4" />
-                  </Button>
+            {selectedObjects
+              .map((id) => allModels.find((model) => model.id === id))
+              .filter((object) => object !== undefined)
+              .map((object) => (
+                <div key={object.id} className="flex-1 relative">
+                  <ThreeDRenderer object={object.name} />
                 </div>
-              </div>
-            ))}
+              ))}
+
             {selectedObjects.length === 0 && (
               <div className="w-full h-full flex items-center justify-center text-gray-500">
                 Select an object to render
