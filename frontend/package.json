@@ -6,7 +6,7 @@
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@mui/icons-material": "^6.1.2",
-    "@mui/material": "^6.1.2",
+    "@mui/material": "^6.1.6",
     "@react-three/drei": "^9.112.0",
     "@react-three/fiber": "^8.17.7",
     "@testing-library/jest-dom": "^5.17.0",
