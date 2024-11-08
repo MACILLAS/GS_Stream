@@ -25,6 +25,11 @@ const CsrCanvas = ({
   });
 
   useEffect(() => {
+    console.log('splatUrl:', splatUrl);
+    console.log('modelPosition:', modelPosition);
+  }, [splatUrl, modelPosition]);
+
+  useEffect(() => {
     if (handleResetCamera) {
       handleResetCamera();
     }
@@ -49,16 +54,18 @@ const CsrCanvas = ({
   }, []);
 
   return (
-    <div>
+    <div className="w-full h-full relative">
       <KeyDisplay keysPressed={keysPressed} />
-      <div>
-        <h3>Camera Pose</h3>
-        <p>
+
+      {/* Camera Pose 출력 부분 */}
+      <div className="absolute top-0 right-0 p-2 bg-white bg-opacity-75 rounded z-10">
+        <h3 className="text-sm font-semibold">Camera Pose</h3>
+        <p className="text-xs">
           Position: x: {cameraPose.position.x.toFixed(2)}, y:{' '}
           {cameraPose.position.y.toFixed(2)}, z:{' '}
           {cameraPose.position.z.toFixed(2)}
         </p>
-        <p>
+        <p className="text-xs">
           Rotation: x: {cameraPose.rotation.x.toFixed(2)}°, y:{' '}
           {cameraPose.rotation.y.toFixed(2)}°, z:{' '}
           {cameraPose.rotation.z.toFixed(2)}°
@@ -66,13 +73,13 @@ const CsrCanvas = ({
       </div>
 
       <Canvas
-        style={{ width: '800px', height: '600px' }}
+        style={{ width: '100%', height: '100%' }}
         className="bg-background"
         gl={{ antialias: false }}
-        dpr={1}
+        dpr={window.devicePixelRatio || 1} // 향상된 렌더링 품질
         camera={cameraSettings}
       >
-        <axesHelper args={[5]} /> {/* Displays coordinate axes with size 5 */}
+        <axesHelper args={[5]} />
         <CameraControls
           controlsRef={controlsRef}
           keysPressed={keysPressed}
