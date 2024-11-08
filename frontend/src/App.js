@@ -11,6 +11,9 @@ import DualView from './components/View/SSR/Dual/DualView';
 import CsrSingleView from './components/View/CSR/Single/CsrSingleView';
 import CsrDualView from './components/View/CSR/Dual/CsrDualView';
 import Login from './components/Login/Login';
+import Landing1 from './components/Main/Landing1';
+import Landing2 from './components/Main/Landing2';
+import RenderingPage from './components/View/CSR/New/NewView'; // /render 경로에 해당하는 컴포넌트
 
 function App() {
   const [token, setToken] = useState(null);
@@ -25,6 +28,9 @@ function App() {
           path="/"
           element={requireAuth && !token ? <Navigate to="/login" /> : <Index />}
         />
+        <Route path="/landing1" element={<Landing1 />} />
+        <Route path="/landing2" element={<Landing2 />} />
+        <Route path="/render" element={<RenderingPage />} />
         <Route
           path="/dual-view"
           element={
