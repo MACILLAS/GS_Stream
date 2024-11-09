@@ -60,7 +60,10 @@ export default function LandingPage() {
       <header className="container mx-auto px-4 py-4">
         <nav className="flex justify-between items-center">
           <h1 className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-sky-600 to-blue-600 leading-normal">
-            Towereye AI
+            TowerEye AI
+            <span style={{ fontSize: '0.75em', verticalAlign: 'super' }}>
+              ™
+            </span>{' '}
           </h1>
           <div className="space-x-6">
             <a

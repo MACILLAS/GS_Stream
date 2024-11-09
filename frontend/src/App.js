@@ -13,7 +13,7 @@ import CsrDualView from './components/View/CSR/Dual/CsrDualView';
 import Login from './components/Login/Login';
 import Landing1 from './components/Main/Landing1';
 import Landing2 from './components/Main/Landing2';
-import RenderingPage from './components/View/CSR/New/NewView'; // /render 경로에 해당하는 컴포넌트
+import RenderingPage from './components/View/CSR/Combine/Render';
 
 function App() {
   const [token, setToken] = useState(null);
@@ -26,7 +26,9 @@ function App() {
         <Route path="/login" element={<Login setToken={setToken} />} />
         <Route
           path="/"
-          element={requireAuth && !token ? <Navigate to="/login" /> : <Index />}
+          element={
+            requireAuth && !token ? <Navigate to="/login" /> : <Landing1 />
+          }
         />
         <Route path="/landing1" element={<Landing1 />} />
         <Route path="/landing2" element={<Landing2 />} />
