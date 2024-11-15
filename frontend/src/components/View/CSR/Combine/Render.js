@@ -53,7 +53,7 @@ function RenderingPage() {
   const cameraControlsRef2 = useRef(null);
 
   const getWebglModelUrl = (modelId) => {
-    return `${backendCsrAddress}/api/models/splat/${modelId}`;
+    return `${backendCsrAddress}/api/assets/splat/${modelId}`;
   };
 
   const handleResetCamera = useCallback(() => {
@@ -80,7 +80,7 @@ function RenderingPage() {
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      fetch(backendCsrAddress + '/api/models/splat/list')
+      fetch(backendCsrAddress + '/api/assets/splat/list')
         .then((response) => response.json())
         .then((data) => {
           if (JSON.stringify(data) !== JSON.stringify(allModels)) {
