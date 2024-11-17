@@ -118,8 +118,8 @@ function RenderingPage() {
     () => ({
       position: [0, 0, 30],
       fov: 75,
-      near: 20,
-      far: 1000,
+      near: 0.05,
+      far: 500,
     }),
     [],
   );
