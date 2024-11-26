@@ -14,3 +14,4 @@ node_modules/
 .DS_Store
 docker-build-*
 .coverage
+*.splat
