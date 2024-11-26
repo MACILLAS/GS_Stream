@@ -1,52 +1,18 @@
-import React, { useState, useEffect } from 'react';
+// src/pages/Login.js
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Container,
-  Box,
-  TextField,
-  Button,
-  Typography,
-  Alert,
-} from '@mui/material';
+import { ArrowRight } from 'lucide-react';
 
 const Login = ({ setToken }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const [attempts, setAttempts] = useState(0);
-  const [isBlocked, setIsBlocked] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false); // Manage block state
+  const [blockType, setBlockType] = useState(null); // Manage block type
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Check if the user is blocked from localStorage
-    const blockExpireTime = localStorage.getItem('blockExpireTime');
-    if (blockExpireTime) {
-      const now = new Date().getTime();
-      if (now < blockExpireTime) {
-        setIsBlocked(true);
-        const timeout = blockExpireTime - now;
-        // Unblock the user after the timeout
-        setTimeout(() => {
-          setIsBlocked(false);
-          localStorage.removeItem('blockExpireTime');
-          setAttempts(0);
-        }, timeout);
-      } else {
-        // Block time expired
-        localStorage.removeItem('blockExpireTime');
-      }
-    }
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (isBlocked) {
-      setErrorMessage(
-        'You have been blocked for 1 hour after 5 failed attempts. Please try again later.',
-      );
-      return;
-    }
 
     try {
       const response = await fetch(
@@ -60,6 +26,30 @@ const Login = ({ setToken }) => {
         },
       );
 
+      if (response.status === 429) {
+        // Handle rate limit response
+        const data = await response.json();
+        setErrorMessage(data.message); // Display message sent from server
+        setIsBlocked(true);
+        setBlockType(data.blockType);
+
+        // Clear input fields
+        setUsername('');
+        setPassword('');
+
+        // Set unblock timer after checking Retry-After header
+        const retryAfter = response.headers.get('Retry-After');
+        if (retryAfter) {
+          const timeout = parseInt(retryAfter, 10) * 1000; // Convert seconds to milliseconds
+          setTimeout(() => {
+            setIsBlocked(false);
+            setBlockType(null);
+            setErrorMessage('');
+          }, timeout);
+        }
+        return;
+      }
+
       if (!response.ok) {
         throw new Error('Invalid username or password.');
       }
@@ -72,88 +62,91 @@ const Login = ({ setToken }) => {
       setErrorMessage(error.message);
       setUsername('');
       setPassword('');
-      setAttempts((prev) => prev + 1);
-
-      if (attempts + 1 >= 5) {
-        const blockTime = new Date().getTime() + 60 * 60 * 1000; // Block for 1 hour
-        localStorage.setItem('blockExpireTime', blockTime);
-        setIsBlocked(true);
-        setErrorMessage(
-          'You have been blocked for 1 hour after 5 failed attempts. Please try again later.',
-        );
-      }
     }
   };
 
   return (
-    <Container maxWidth="xs">
-      <Box
-        sx={{
-          marginTop: 8,
-          padding: 4,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          border: '1px solid #ccc',
-          borderRadius: 2,
-          boxShadow: 2,
-        }}
-      >
-        <Typography component="h1" variant="h5">
+    <div className="relative min-h-screen bg-gradient-to-r from-sky-50 to-blue-50 flex items-start justify-center pt-12">
+      {/* Login Card */}
+      <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-lg z-10">
+        <h1 className="text-3xl font-extrabold text-sky-600 mb-6 text-center">
           TowerEye AI™ Login
-        </Typography>
+        </h1>
         {errorMessage && (
-          <Alert severity="error" sx={{ width: '100%', mt: 2 }}>
+          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
             {errorMessage}
-          </Alert>
+          </div>
         )}
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-          <TextField
-            label="Username"
-            fullWidth
-            margin="normal"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            disabled={isBlocked}
-          />
-          <TextField
-            label="Password"
-            type="password"
-            fullWidth
-            margin="normal"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={isBlocked}
-          />
-          <Button
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label
+              htmlFor="username"
+              className="block text-slate-800 font-medium mb-1"
+            >
+              Username
+            </label>
+            <input
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              // Disable input if IP blocked, enable if user blocked
+              disabled={isBlocked && blockType === 'IP'}
+              className={`w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none transition ${
+                isBlocked && blockType === 'IP'
+                  ? 'bg-gray-200 cursor-not-allowed opacity-50'
+                  : 'focus:ring-2 focus:ring-sky-600'
+              }`}
+              required
+              placeholder="Enter your username"
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-slate-800 font-medium mb-1"
+            >
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              // Disable input if IP blocked, enable if user blocked
+              disabled={isBlocked && blockType === 'IP'}
+              className={`w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none transition ${
+                isBlocked && blockType === 'IP'
+                  ? 'bg-gray-200 cursor-not-allowed opacity-50'
+                  : 'focus:ring-2 focus:ring-sky-600'
+              }`}
+              required
+              placeholder="Enter your password"
+            />
+          </div>
+          <button
             type="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            disabled={isBlocked}
-            sx={{ mt: 3 }}
+            // Disable button if IP blocked, enable if user blocked
+            disabled={isBlocked && blockType === 'IP'}
+            className={`w-full flex items-center justify-center px-4 py-2 font-semibold text-white bg-sky-600 rounded-md transition-colors ${
+              isBlocked && blockType === 'IP'
+                ? 'opacity-50 cursor-not-allowed bg-gray-400'
+                : 'hover:bg-sky-700'
+            }`}
           >
             Login
-          </Button>
-        </Box>
-        {/* Footer with Icon */}
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginTop: 3,
-          }}
-        >
-          <Typography variant="body2" sx={{ mr: 1 }}>
-            Visit us on
-          </Typography>
+            <ArrowRight className="w-5 h-5 ml-2" />
+          </button>
+        </form>
+        {/* Footer Icon */}
+        <div className="mt-6 flex items-center justify-center">
+          <span className="text-slate-600 mr-2">Visit us on</span>
           <a href="https://cviss.net" target="_blank" rel="noopener noreferrer">
-            <img src="/icons/cviss.jpeg" alt="CViSS" width="40" height="30" />
+            <img src="/icons/cviss.jpeg" alt="CViSS" className="w-10 h-8" />
           </a>
-        </Box>
-      </Box>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 };
 

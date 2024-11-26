@@ -10,10 +10,8 @@ COPY package*.json ./
 # Install all dependencies (including devDependencies)
 RUN npm install
 
-# Copy source code
-COPY src ./src
-COPY public ./public
-COPY jsconfig.json .
+# Copy all necessary files for the build
+COPY . .
 
 # Set build-time variables
 ARG REACT_APP_BACKEND_URL

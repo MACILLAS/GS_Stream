@@ -11,6 +11,8 @@ splat_assets = [
     {"id": "101", "name": "st_comb/st_1", "file": "st_1.splat"},
     {"id": "102", "name": "st_comb/st_2", "file": "st_2.splat"},
     {"id": "103", "name": "RCH", "file": "rch.splat"},
+    {"id": "104", "name": "tower/ford_tower_06_07", "file": "ford_tower_06_07.splat"},
+    {"id": "105", "name": "tower/ford_tower_06_09", "file": "ford_tower_06_09.splat"},
 ]
 
 

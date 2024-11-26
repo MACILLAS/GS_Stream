@@ -11,4 +11,5 @@ export const keyActions = {
   KeyL: 'Rotate camera right (increase azimuthal angle)',
   KeyK: 'Rotate camera up (decrease polar angle)',
   KeyI: 'Rotate camera down (increase polar angle)',
+  KeyR: 'Reset Camera',
 };
