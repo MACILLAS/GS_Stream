@@ -116,10 +116,11 @@ function RenderingPage() {
 
   const cameraSettings = useMemo(
     () => ({
-      position: [0, 0, 30],
+      position: [17.46, 65.26, 16.1],
+      rotation: [-115.29, 48.02, 152.66],
       fov: 75,
       near: 0.05,
-      far: 500,
+      far: 1000,
     }),
     [],
   );

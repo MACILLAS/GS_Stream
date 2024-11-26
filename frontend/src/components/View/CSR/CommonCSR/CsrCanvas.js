@@ -49,7 +49,10 @@ const CsrCanvas = forwardRef(
       };
     }, []);
 
-    const initialRotation = useMemo(() => ({ x: 0, y: 0, z: 0 }), []);
+    const initialRotation = useMemo(
+      () => ({ x: -115.29, y: 48.02, z: 152.66 }),
+      [],
+    );
 
     return (
       <div className="w-full h-full relative">
