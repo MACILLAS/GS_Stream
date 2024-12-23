@@ -1,40 +1,51 @@
-import { useThree } from '@react-three/fiber';
+import { useThree, useFrame } from '@react-three/fiber';
 import { useCallback, useEffect } from 'react';
 import { Vector2, Raycaster, Vector3 } from 'three';
+import apiService from '../../../../services/apiService';
 
 const ClickMarkerControl = ({ splatRef, markers, setMarkers }) => {
-  const { scene, camera, gl } = useThree();
+  const { camera, gl } = useThree();
 
-  const updateMarkerScreenPositions = useCallback(() => {
-    const newMarkers = markers.map((marker) => {
-      const screenPosition = marker.position.clone().project(camera);
-      screenPosition.x =
-        (screenPosition.x * 0.5 + 0.5) * gl.domElement.clientWidth;
-      screenPosition.y =
-        (screenPosition.y * -0.5 + 0.72) * gl.domElement.clientHeight;
-      const visible = screenPosition.z < 1;
-      return { ...marker, screenPosition, visible };
-    });
+  const fetchMarkers = useCallback(async () => {
+    const annotations = await apiService.getAnnotations();
+    const newMarkers = annotations.map((annotation) => ({
+      id: annotation.id,
+      position: new Vector3(
+        annotation.position.x,
+        annotation.position.y,
+        annotation.position.z,
+      ),
+      metadata: annotation.metadata,
+      label: annotation.label || annotation.metadata?.info || 'Untitled Marker',
+    }));
     setMarkers(newMarkers);
-  }, [camera, gl, markers, setMarkers]);
+  }, [setMarkers]);
 
   useEffect(() => {
-    updateMarkerScreenPositions();
-  }, [camera, gl, markers, updateMarkerScreenPositions]);
+    fetchMarkers();
+  }, [fetchMarkers]);
 
-  useEffect(() => {
-    const handleCameraMove = () => {
-      updateMarkerScreenPositions();
-    };
-    gl.domElement.addEventListener('cameraMove', handleCameraMove);
-
-    return () => {
-      gl.domElement.removeEventListener('cameraMove', handleCameraMove);
-    };
-  }, [gl, updateMarkerScreenPositions]);
+  useFrame(() => {
+    setMarkers((prevMarkers) =>
+      prevMarkers.map((marker) => {
+        const pos = new Vector3(
+          marker.position.x,
+          marker.position.y,
+          marker.position.z,
+        );
+        const screenPosition = pos.project(camera);
+        screenPosition.x =
+          (screenPosition.x * 0.5 + 0.5) * gl.domElement.clientWidth;
+        screenPosition.y =
+          (screenPosition.y * -0.5 + 0.72) * gl.domElement.clientHeight;
+        const visible = screenPosition.z < 1;
+        return { ...marker, screenPosition, visible };
+      }),
+    );
+  });
 
   const handleClick = useCallback(
-    (event) => {
+    async (event) => {
       const rect = gl.domElement.getBoundingClientRect();
       const mousePosition = new Vector2();
       mousePosition.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
@@ -88,9 +99,31 @@ const ClickMarkerControl = ({ splatRef, markers, setMarkers }) => {
           (screenPosition.x * 0.5 + 0.5) * gl.domElement.clientWidth;
         screenPosition.y =
           (screenPosition.y * -0.5 + 0.5) * gl.domElement.clientHeight;
+
+        const newMarkerData = {
+          position: {
+            x: markerPosition.x,
+            y: markerPosition.y,
+            z: markerPosition.z,
+          },
+          metadata: { info: 'Marker' },
+          label: 'New Marker',
+        };
+
+        const createdMarker = await apiService.createAnnotation(newMarkerData);
+
         setMarkers((prev) => [
           ...prev,
-          { position: markerPosition, screenPosition },
+          {
+            id: createdMarker.id,
+            position: markerPosition,
+            metadata: createdMarker.metadata,
+            label:
+              createdMarker.label ||
+              createdMarker.metadata?.info ||
+              'Untitled Marker',
+            screenPosition,
+          },
         ]);
       }
     },
@@ -99,22 +132,11 @@ const ClickMarkerControl = ({ splatRef, markers, setMarkers }) => {
 
   useEffect(() => {
     gl.domElement.addEventListener('click', handleClick);
-
     return () => {
       gl.domElement.removeEventListener('click', handleClick);
     };
-  }, [scene, camera, gl, setMarkers, handleClick]);
+  }, [gl, handleClick]);
 
-  return (
-    <>
-      {markers.map((marker, index) => (
-        <mesh key={index} position={marker.position}>
-          <sphereGeometry args={[1, 10, 10]} />
-          <meshBasicMaterial color={0xff0000} />
-        </mesh>
-      ))}
-    </>
-  );
+  return null;
 };
-
 export default ClickMarkerControl;

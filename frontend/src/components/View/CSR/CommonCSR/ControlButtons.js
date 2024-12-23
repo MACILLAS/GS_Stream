@@ -7,8 +7,6 @@ const ControlButtons = ({
   rotationDelta,
   setRotationDelta,
 }) => {
-  console.log('ControlButtons props:', { delta, rotationDelta });
-
   const handleDeltaChange = (event) => {
     setDelta(parseFloat(event.target.value));
   };

@@ -18,12 +18,11 @@ import CsrCanvas from './CsrCanvas';
 import ControlButtons from './ControlButtons';
 
 import { SINGLE_VIEW_SETTINGS } from './CsrSingleViewSettings';
+import apiService from '../../../../services/apiService';
 
 const CsrSingleView = () => {
   const location = useLocation();
   const { modelUrl } = location.state || {};
-
-  console.log('Model URL:', modelUrl);
 
   const controlsRef = useRef(null);
 
@@ -34,16 +33,19 @@ const CsrSingleView = () => {
   );
 
   const [markers, setMarkers] = useState([]);
-  const handleUpdateMarker = (index, newMarker) => {
-    setMarkers((prevMarkers) => {
-      const updatedMarkers = [...prevMarkers];
-      updatedMarkers[index] = newMarker;
-      return updatedMarkers;
-    });
+  const handleUpdateMarker = (markerId, newMarker) => {
+    setMarkers((prevMarkers) =>
+      prevMarkers.map((marker) =>
+        marker.id === markerId ? { ...marker, ...newMarker } : marker,
+      ),
+    );
   };
 
-  const handleDeleteMarker = (index) => {
-    setMarkers((prevMarkers) => prevMarkers.filter((_, i) => i !== index));
+  const handleDeleteMarker = async (markerId) => {
+    await apiService.deleteAnnotation(markerId);
+    setMarkers((prevMarkers) =>
+      prevMarkers.filter((marker) => marker.id !== markerId),
+    );
   };
 
   // Pass the resetCamera handler to CsrCanvas

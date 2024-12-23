@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import CameraControls from './CameraControls';
 import SplatComponent from 'components/View/CSR/Splat/SplatComponent';
-import { Environment } from '@react-three/drei';
+import { Environment, Sphere } from '@react-three/drei';
 import KeyDisplay from './KeyDisplay';
 import ClickMarkerControl from '../CommonCSR/ClickMarkerControl';
 import MarkerComponent from './MarkerComponent';
@@ -56,7 +56,7 @@ const CsrCanvas = ({
   }, []);
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div style={{ position: 'relative', overflow: 'hidden' }}>
       <KeyDisplay keysPressed={keysPressed} />
       <div>
         <h3>Camera Pose</h3>
@@ -71,11 +71,6 @@ const CsrCanvas = ({
           {cameraPose.rotation.z.toFixed(2)}°
         </p>
       </div>
-      <MarkerComponent
-        markers={markers}
-        handleUpdateMarker={handleUpdateMarker}
-        handleDeleteMarker={handleDeleteMarker}
-      />
       <Canvas
         style={{ width: '800px', height: '600px' }}
         className="bg-background"
@@ -109,7 +104,17 @@ const CsrCanvas = ({
           frustumCulled={false}
         />
         <Environment preset="city" />
+        {markers.map((marker, index) => (
+          <Sphere key={index} args={[1, 16, 16]} position={marker.position}>
+            <meshBasicMaterial attach="material" color={0xff0000} />
+          </Sphere>
+        ))}
       </Canvas>
+      <MarkerComponent
+        markers={markers}
+        handleUpdateMarker={handleUpdateMarker}
+        handleDeleteMarker={handleDeleteMarker}
+      />
     </div>
   );
 };
